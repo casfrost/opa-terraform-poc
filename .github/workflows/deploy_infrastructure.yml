@@ -11,11 +11,11 @@ name: "Infrastructure Workflow"
 on:
   push:
     branches: main
-    
+
 defaults:
-      run:
-        shell: bash
-        working-directory: ${{ env.WORKING_DIR }}
+    run:
+      shell: bash
+      working-directory: .infrastructure
 
 jobs:
   #########################################################################
@@ -28,7 +28,6 @@ jobs:
       ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
       ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
       ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
-      WORKING_DIR: .infrastructure
 
     steps:
       - uses: actions/checkout@v2
@@ -54,7 +53,6 @@ jobs:
       ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
       ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
       ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
-      WORKING_DIR: .infrastructure
 
     steps:
       - uses: actions/checkout@v2
@@ -89,7 +87,6 @@ jobs:
       ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
       ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
       ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
-      WORKING_DIR: .infrastructure
     steps:
       - name: Get prepared plan
         uses: actions/download-artifact@v2
