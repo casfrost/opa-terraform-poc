@@ -1,0 +1,111 @@
+name: "Infrastructure Workflow"
+
+# This workflow only triggers when code is pushed to a branch called infrastructure/*
+on:
+  push:
+    paths:
+      - ".infrastructure/*"
+
+jobs:
+  #########################################################################
+  # Workflow job to initialize, format, validate and check Terraform code #
+  #########################################################################
+  terraform-nonprod-preplan:
+    runs-on: ubuntu-latest
+    environment: NonProduction
+    env:
+      ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+      ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+      ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+      ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+      # TF_WORKSPACE: ./.infrastructure
+
+    # Use bash shell regardless whether the runner is ubuntu, macos or windows
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v1
+      - name: Terraform Init
+        run: terraform init
+        working-directory: ./.infrastructure/
+      - name: Terraform format
+        run: terraform fmt -check --recursive
+        working-directory: ./.infrastructure/
+      - name: Terraform Validate
+        run: terraform validate
+        working-directory: ./.infrastructure/
+      - name: Terraform checkov
+        id: tf_checkov
+        uses: bridgecrewio/checkov-action@master
+        with:
+          directory: ./.infrastructure/
+          framework: terraform
+          output_format: json
+          quiet: true
+          skip_check: CKV2_AZURE_1,CKV2_AZURE_18,CKV_AZURE_43,CKV_AZURE_33
+
+  ##############################################################
+  # Terraform plan job that uploads a terraform plan artifact  #
+  ##############################################################
+  terraform-nonprod-plan:
+    needs: [terraform-nonprod-preplan]
+    runs-on: ubuntu-latest
+    environment: NonProduction
+    env:
+      ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+      ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+      ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+      ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v1
+        with:
+          terraform_wrapper: true # Pros/cons of true/false?
+      - name: Terraform Init
+        run: terraform init
+        working-directory: ./.infrastructure/
+      - name: Terraform Plan
+        run: terraform plan -no-color -out=terraform.plan
+        working-directory: ./.infrastructure/
+      - name: Upload Terraform artifacts after successful plan
+        uses: actions/upload-artifact@v3
+        with:
+          name: terraform
+          path: |
+            ./.infrastructure/.terraform
+            ./.infrastructure/*.tf
+            ./.infrastructure/*.lock.hcl
+            ./.infrastructure/terraform.plan
+          if-no-files-found: error
+
+  ##################################################################
+  # Terraform apply job that downloads said artifact and applys it #
+  ##################################################################
+  terraform-nonprod-apply:
+    needs: [terraform-nonprod-plan]
+    runs-on: ubuntu-latest
+    environment: NonProduction
+    env:
+      ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+      ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+      ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+      ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+    steps:
+      - name: Get prepared plan
+        uses: actions/download-artifact@v2
+        with:
+          name: terraform
+          path: ./.infrastructure/
+      - run: chmod -R u+x .terraform
+        working-directory: ./.infrastructure/
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v1
+      - name: Terraform apply
+        run: terraform apply -auto-approve ./terraform.plan
+        working-directory: ./.infrastructure/
