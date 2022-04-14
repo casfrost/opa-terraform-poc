@@ -15,8 +15,7 @@ on:
 defaults:
     run:
       shell: bash
-      working-directory: .infrastructure
-
+      
 jobs:
   #########################################################################
   # Workflow job to initialize, format, validate and check Terraform code #
@@ -36,12 +35,13 @@ jobs:
         uses: hashicorp/setup-terraform@v1
       - name: Terraform Init
         run: terraform init
-
+        working-directory: .infrastructure
       - name: Terraform format
         run: terraform fmt -check --recursive
-
+        working-directory: .infrastructure
       - name: Terraform Validate
         run: terraform validate
+        working-directory: .infrastructure
 
   ##############################################################
   # Terraform plan job that uploads a terraform plan artifact  #
@@ -63,9 +63,10 @@ jobs:
 
       - name: Terraform Init
         run: terraform init
-
+        working-directory: .infrastructure
       - name: Terraform Plan
         run: terraform plan -no-color -out=terraform.plan
+        working-directory: .infrastructure
 
       - name: Upload Terraform artifacts after successful plan
         uses: actions/upload-artifact@v3
@@ -90,19 +91,19 @@ jobs:
       ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
       ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
       ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
-    steps:
-      - run: mkdir .infrastructure
-        working-directory: ..
+    steps: 
       - name: Get prepared plan
         uses: actions/download-artifact@v2
         with:
           name: terraform
+          path: ./.infrastructure
       - run: ls -la
         shell: bash
       - run: chmod -R u+x .terraform
-
+        working-directory: .infrastructure
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v1
       - name: Terraform apply
-        run: terraform apply -auto-approve ../terraform.plan
+        run: terraform apply -auto-approve ./terraform.plan
+        working-directory: .infrastructure
 
