@@ -95,11 +95,10 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: terraform
-      - run: chmod -R u+x .infrastructure/.terraform
-        working-directory: .infrastructure
+      - run: chmod -R u+x ../.terraform
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v1
       - name: Terraform apply
-        run: terraform apply -auto-approve ./terraform.plan
-        working-directory: .infrastructure
+        run: terraform apply -auto-approve ../terraform.plan
+
