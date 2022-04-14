@@ -4,7 +4,7 @@ name: "Infrastructure Workflow"
 on:
   push:
     paths:
-      - ".infrastructure/*"
+      - ".infrastructure/**"
 
 jobs:
   #########################################################################
