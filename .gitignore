@@ -1,0 +1,7 @@
+# Terraform ignores
+.infrastructure/.terraform
+.infrastructure/.terraform.lock.hcl
+.infrastructure/terraform.tfstate
+
+# Ignore SPN login script
+spn-login.sh
