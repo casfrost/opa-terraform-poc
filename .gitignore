@@ -1,7 +1,14 @@
 # Terraform ignores
 .infrastructure/.terraform
 .infrastructure/.terraform.lock.hcl
-.infrastructure/terraform.tfstate
+.infrastructure/*.tfstate
+.infrastructure/*.backup
 
 # Ignore SPN login script
 spn-login.sh
+
+# iac-prerequisites
+iac-prerequisites
+
+# General files
+tmp.json
