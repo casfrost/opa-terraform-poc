@@ -72,10 +72,10 @@ jobs:
         with:
           name: terraform
           path: |
-            .terraform
-            *.tf
-            *.lock.hcl
-            terraform.plan
+            .infrastructure/.terraform
+            .infrastructure/*.tf
+            .infrastructure/*.lock.hcl
+            .infrastructure/terraform.plan
           if-no-files-found: error
 
   ##################################################################
