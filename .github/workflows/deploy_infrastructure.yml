@@ -7,6 +7,11 @@ on:
     paths:
       - ".infrastructure/**"
 
+defaults:
+      run:
+        shell: bash
+        working-directory: ${{ env.WORKING_DIR }}
+
 jobs:
   #########################################################################
   # Workflow job to initialize, format, validate and check Terraform code #
@@ -17,14 +22,8 @@ jobs:
     env:
       ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
       ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
-      ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
       ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
-      TF_WORKSPACE: .infrastructure/
-
-    # Use bash shell regardless whether the runner is ubuntu, macos or windows
-    defaults:
-      run:
-        shell: bash
+      WORKING_DIR: .infrastructure
 
     steps:
       - uses: actions/checkout@v2
@@ -39,16 +38,6 @@ jobs:
       - name: Terraform Validate
         run: terraform validate
 
-      - name: Terraform checkov
-        id: tf_checkov
-        uses: bridgecrewio/checkov-action@master
-        with:
-          directory: ./.infrastructure/
-          framework: terraform
-          output_format: json
-          quiet: true
-          skip_check: CKV2_AZURE_1,CKV2_AZURE_18,CKV_AZURE_43,CKV_AZURE_33
-
   ##############################################################
   # Terraform plan job that uploads a terraform plan artifact  #
   ##############################################################
@@ -59,15 +48,14 @@ jobs:
     env:
       ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
       ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
-      ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
       ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+      WORKING_DIR: .infrastructure
 
     steps:
       - uses: actions/checkout@v2
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v1
-        with:
-          terraform_wrapper: true # Pros/cons of true/false?
+
       - name: Terraform Init
         run: terraform init
 
@@ -95,8 +83,8 @@ jobs:
     env:
       ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
       ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
-      ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
       ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+      WORKING_DIR: .infrastructure
     steps:
       - name: Get prepared plan
         uses: actions/download-artifact@v2
