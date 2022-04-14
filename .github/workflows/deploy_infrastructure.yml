@@ -95,7 +95,7 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: terraform
-      - run: ls -la
+      - run: bash -c "ls -la"
       - run: chmod -R u+x .terraform
 
       - name: Setup Terraform
