@@ -2,11 +2,16 @@ name: "Infrastructure Workflow"
 
 # This workflow only triggers when code is pushed to a branch called infrastructure/*
 
+# Activate when workflow is working
+#on:
+#  push:
+#    paths:
+#      - ".infrastructure/**"
+
 on:
   push:
-    paths:
-      - ".infrastructure/**"
-
+    branches: main
+    
 defaults:
       run:
         shell: bash
