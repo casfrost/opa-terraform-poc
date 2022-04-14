@@ -92,6 +92,7 @@ jobs:
       ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
     steps:
       - run: mkdir .infrastructure
+        working-directory: ..
       - name: Get prepared plan
         uses: actions/download-artifact@v2
         with:
