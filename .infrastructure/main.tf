@@ -9,12 +9,15 @@ resource "azurerm_resource_group" "rg" {
   location = var.location
 }
 
-# Service Principal is gained Contributor role on subscription level for demonstration purposes
-resource "azurerm_role_assignment" "role" {
-  scope                = azurerm_resource_group.rg.id
-  role_definition_name = "Contributor"
-  principal_id         = data.azurerm_client_config.role.object_id
-}
+# Service Principal is gained Contributor role on subscription level for demonstration purposes.
+# In reality, this assignment should happen in a different project when the resource group is created,
+# and the app service plan project should use the remote state.
+
+# resource "azurerm_role_assignment" "role" {
+#  scope                = azurerm_resource_group.rg.id
+#  role_definition_name = "Contributor"
+#  principal_id         = data.azurerm_client_config.role.object_id
+# }
 
 resource "azurerm_service_plan" "asp" {
   name                = var.asp_name
