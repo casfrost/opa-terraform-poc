@@ -20,7 +20,7 @@ jobs:
   #########################################################################
   # Workflow job to initialize, format, validate and check Terraform code #
   #########################################################################
-  terraform-nonprod-preplan:
+  terraform-preplan:
     runs-on: ubuntu-latest
     environment: NonProduction
     env:
@@ -46,8 +46,8 @@ jobs:
   ##############################################################
   # Terraform plan job that uploads a terraform plan artifact  #
   ##############################################################
-  terraform-nonprod-plan:
-    needs: [terraform-nonprod-preplan]
+  terraform-plan:
+    needs: [terraform-preplan]
     runs-on: ubuntu-latest
     environment: NonProduction
     env:
@@ -82,8 +82,8 @@ jobs:
   ##################################################################
   # Terraform apply job that downloads said artifact and applys it #
   ##################################################################
-  terraform-nonprod-apply:
-    needs: [terraform-nonprod-plan]
+  terraform-apply:
+    needs: [terraform-plan]
     runs-on: ubuntu-latest
     environment: NonProduction
     env:
