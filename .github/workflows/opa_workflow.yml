@@ -1,10 +1,10 @@
 name: "Open Policy Agent Workflow"
 
-# This workflow only triggers when code is pushed to a branch called test/*
-
-on:
-  push:
-    branches: "test/*"
+# This workflow only triggers when code is pushed to a branch called test/*.
+# Activate when OPA rules works.
+# on:
+#  push:
+#    branches: "test/*"
 
 defaults:
     run:
