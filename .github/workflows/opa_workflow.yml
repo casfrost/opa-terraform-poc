@@ -1,16 +1,10 @@
-name: "Infrastructure Workflow"
+name: "Open Policy Agent Workflow"
 
-# This workflow only triggers when code is pushed to a branch called infrastructure/*
-
-# Activate when workflow is working
-#on:
-#  push:
-#    paths:
-#      - ".infrastructure/**"
+# This workflow only triggers when code is pushed to a branch called test/*
 
 on:
   push:
-    branches: main
+    branches: "test/*"
 
 defaults:
     run:
@@ -79,10 +73,7 @@ jobs:
             .infrastructure/terraform.plan
           if-no-files-found: error
 
-  ##################################################################
-  # Terraform apply job that downloads said artifact and applys it #
-  ##################################################################
-  terraform-apply:
+  policy-checks:
     needs: terraform-plan
     runs-on: ubuntu-latest
     environment: NonProduction
@@ -91,17 +82,13 @@ jobs:
       ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
       ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
       ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
-    steps: 
-      - name: Get prepared plan
-        uses: actions/download-artifact@v2
-        with:
-          name: terraform
-          path: ./.infrastructure
-      - run: chmod -R u+x .terraform
-        working-directory: .infrastructure
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v1
-      - name: Terraform apply
-        run: terraform apply -auto-approve ./terraform.plan
-        working-directory: .infrastructure
 
+    steps:
+    - name: Download artifact
+      uses: actions/download-artifact@v2
+      with:
+        name: terraform
+        path: ./.infrastructure
+    
+    - name: Install Open Policy Agent
+      # Remember to use working-directory .infrastructure
