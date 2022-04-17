@@ -11,25 +11,25 @@ defaults:
       shell: bash
       
 jobs:
-#  terraform-preplan:
-#    runs-on: ubuntu-latest
-#    environment: NonProduction
-#    steps:
-#      - uses: actions/checkout@v2
-#      - name: Setup Terraform
-#        uses: hashicorp/setup-terraform@v1
-#      - name: Terraform Init
-#        run: terraform init
-#        working-directory: .infrastructure
-#      - name: Terraform format
-#        run: terraform fmt -check --recursive
-#        working-directory: .infrastructure
-#      - name: Terraform Validate
-#        run: terraform validate
-#        working-directory: .infrastructure
+  terraform-preplan:
+    runs-on: ubuntu-latest
+    environment: NonProduction
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v1
+      - name: Terraform Init
+        run: terraform init
+        working-directory: .infrastructure
+      - name: Terraform format
+        run: terraform fmt -check --recursive
+        working-directory: .infrastructure
+      - name: Terraform Validate
+        run: terraform validate
+        working-directory: .infrastructure
 
   run-opa-tests:
- #   needs: terraform-preplan
+    needs: terraform-preplan
     runs-on: ubuntu-latest 
     environment: NonProduction
     env:
@@ -54,4 +54,6 @@ jobs:
       with:
         version: latest
     - name: Run OPA Tests
-      run: opa eval --fail-defined --data tests/main.rego --input tfplan.json "data.tfplan.locationRule" --format pretty
+      run: | 
+        opa eval --fail-defined --data tests/main.rego --input tfplan.json "data.tfplan.locationRule" --format pretty
+        opa eval --fail-defined --data tests/main.rego --input tfplan.json "data.tfplan.skuRule" --format pretty

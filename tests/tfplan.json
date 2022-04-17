@@ -158,7 +158,7 @@
                     "enabled": true,
                     "https_only": false,
                     "identity": [],
-                    "location": "eastus",
+                    "location": "westeurope",
                     "logs": [],
                     "name": "linux-app-service",
                     "resource_group_name": "OPA-POC-RG",
