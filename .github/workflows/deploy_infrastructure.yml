@@ -47,7 +47,7 @@ jobs:
   # Terraform plan job that uploads a terraform plan artifact  #
   ##############################################################
   terraform-plan:
-    needs: [terraform-preplan]
+    needs: terraform-preplan
     runs-on: ubuntu-latest
     environment: NonProduction
     env:
@@ -83,7 +83,7 @@ jobs:
   # Terraform apply job that downloads said artifact and applys it #
   ##################################################################
   terraform-apply:
-    needs: [terraform-plan]
+    needs: terraform-plan
     runs-on: ubuntu-latest
     environment: NonProduction
     env:
@@ -97,8 +97,6 @@ jobs:
         with:
           name: terraform
           path: ./.infrastructure
-      - run: ls -la
-        shell: bash
       - run: chmod -R u+x .terraform
         working-directory: .infrastructure
       - name: Setup Terraform

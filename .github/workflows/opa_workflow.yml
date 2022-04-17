@@ -1,0 +1,60 @@
+name: "Open Policy Agent Workflow"
+
+# This workflow only triggers when code is pushed to a branch called test/*.
+# Activate when OPA rules works.
+on:
+  push:
+    branches: "test/*"
+
+defaults:
+    run:
+      shell: bash
+      
+jobs:
+  terraform-preplan:
+    runs-on: ubuntu-latest
+    environment: NonProduction
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v1
+      - name: Terraform Init
+        run: terraform init
+        working-directory: .infrastructure
+      - name: Terraform format
+        run: terraform fmt -check --recursive
+        working-directory: .infrastructure
+      - name: Terraform Validate
+        run: terraform validate
+        working-directory: .infrastructure
+
+  run-opa-tests:
+    needs: terraform-preplan
+    runs-on: ubuntu-latest 
+    environment: NonProduction
+    env:
+      ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+      ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+      ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+      ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+    - name: Run Terraform Init
+      run: terraform init
+      working-directory: .infrastructure
+    - name: Get Terraform Plan
+      run: terraform plan -out=terraform.plan
+      working-directory: .infrastructure
+    - name: Convert Terraform Plan to JSON
+      run: terraform show -json terraform.plan > ../tfplan.json
+      working-directory: .infrastructure
+    - name: Setup OPA
+      uses: open-policy-agent/setup-opa@v1
+      with:
+        version: latest
+    - name: Run OPA Tests
+      #TODO: Need to figure out why i get exit code 1 in pipeline and how to get around it
+      run: | 
+        opa eval --fail-defined --data tests/main.rego --input tfplan.json "data.tfplan.skuRule" --format pretty
+        opa eval --fail-defined --data tests/main.rego --input tfplan.json "data.tfplan.locationRule" --format pretty
