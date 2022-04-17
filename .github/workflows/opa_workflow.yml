@@ -11,9 +11,6 @@ defaults:
       shell: bash
       
 jobs:
-  #########################################################################
-  # Workflow job to initialize, format, validate and check Terraform code #
-  #########################################################################
   terraform-preplan:
     runs-on: ubuntu-latest
     environment: NonProduction
@@ -37,58 +34,35 @@ jobs:
         run: terraform validate
         working-directory: .infrastructure
 
-  ##############################################################
-  # Terraform plan job that uploads a terraform plan artifact  #
-  ##############################################################
-  terraform-plan:
-    needs: terraform-preplan
-    runs-on: ubuntu-latest
-    environment: NonProduction
-    env:
-      ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
-      ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
-      ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
-      ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
-
-    steps:
-      - uses: actions/checkout@v2
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v1
-
-      - name: Terraform Init
-        run: terraform init
-        working-directory: .infrastructure
-      - name: Terraform Plan
-        run: terraform plan -no-color -out=terraform.plan
-        working-directory: .infrastructure
-
-      - name: Upload Terraform artifacts after successful plan
-        uses: actions/upload-artifact@v3
-        with:
-          name: terraform
-          path: |
-            .infrastructure/.terraform
-            .infrastructure/*.tf
-            .infrastructure/*.lock.hcl
-            .infrastructure/terraform.plan
-          if-no-files-found: error
-
-  policy-checks:
+  run-opa-tests:
     needs: terraform-plan
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest 
     environment: NonProduction
-    env:
-      ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
-      ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
-      ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
-      ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
 
     steps:
-    - name: Download artifact
+    - name: Checkout repository
       uses: actions/download-artifact@v2
-      with:
-        name: terraform
-        path: ./.infrastructure
+    
+    - name: Get Terraform Plan
+      run: terraform plan --out terraform.plan
+      working-directory: .infrastructure
+    
+    - name: Convert Terraform Plan to JSON
+      run: terraform show -json terraform.plan > ../tfplan.json
+      working-directory: .infrastructure
+    
+    - name: Show JSON Terraform plan
+      run: cat tfplan.json
+    
+    # Maybe not necessary
+    #- name: Login to Dockerhub
+    #  uses: docker/login-action@v1
+    #    with:
+    #      username: ${{ secrets.DOCKER_HUB_USERNAME }}
+    #      password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+     
     
     #- name: Install Open Policy Agent
       # Remember to use working-directory .infrastructure
+      # Download and run OPA docker image
+
