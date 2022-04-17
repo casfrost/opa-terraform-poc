@@ -54,4 +54,4 @@ jobs:
       with:
         version: latest
     - name: Run OPA Tests
-      run: opa eval --fail-defined --data tests/main.rego --input tfplan.json "data.tfplan.locationRule"
+      run: opa eval --fail-defined --data tests/main.rego --input tfplan.json "data.tfplan.locationRule" --format pretty
