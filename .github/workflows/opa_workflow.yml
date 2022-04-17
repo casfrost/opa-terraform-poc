@@ -40,7 +40,7 @@ jobs:
       run: terraform init
       working-directory: .infrastructure
     - name: Get Terraform Plan
-      run: terraform plan -out terraform.plan
+      run: terraform plan -out=terraform.plan
       working-directory: .infrastructure
     
     - name: Convert Terraform Plan to JSON
