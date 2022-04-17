@@ -11,27 +11,32 @@ defaults:
       shell: bash
       
 jobs:
-  terraform-preplan:
-    runs-on: ubuntu-latest
-    environment: NonProduction
-    steps:
-      - uses: actions/checkout@v2
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v1
-      - name: Terraform Init
-        run: terraform init
-        working-directory: .infrastructure
-      - name: Terraform format
-        run: terraform fmt -check --recursive
-        working-directory: .infrastructure
-      - name: Terraform Validate
-        run: terraform validate
-        working-directory: .infrastructure
+#  terraform-preplan:
+#    runs-on: ubuntu-latest
+#    environment: NonProduction
+#    steps:
+#      - uses: actions/checkout@v2
+#      - name: Setup Terraform
+#        uses: hashicorp/setup-terraform@v1
+#      - name: Terraform Init
+#        run: terraform init
+#        working-directory: .infrastructure
+#      - name: Terraform format
+#        run: terraform fmt -check --recursive
+#        working-directory: .infrastructure
+#      - name: Terraform Validate
+#        run: terraform validate
+#        working-directory: .infrastructure
 
   run-opa-tests:
-    needs: terraform-preplan
+ #   needs: terraform-preplan
     runs-on: ubuntu-latest 
     environment: NonProduction
+    env:
+      ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+      ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+      ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+      ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
 
     steps:
     - name: Checkout repository
@@ -42,10 +47,8 @@ jobs:
     - name: Get Terraform Plan
       run: terraform plan -out=terraform.plan
       working-directory: .infrastructure
-    
     - name: Convert Terraform Plan to JSON
       run: terraform show -json terraform.plan > ../tfplan.json
       working-directory: .infrastructure
-    
     - name: Show JSON Terraform plan
       run: cat tfplan.json
