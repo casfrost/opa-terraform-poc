@@ -38,7 +38,7 @@ jobs:
       uses: actions/download-artifact@v2
     
     - name: Get Terraform Plan
-      run: terraform plan --out terraform.plan
+      run: terraform plan -out terraform.plan
       working-directory: .infrastructure
     
     - name: Convert Terraform Plan to JSON
@@ -47,16 +47,3 @@ jobs:
     
     - name: Show JSON Terraform plan
       run: cat tfplan.json
-    
-    # Maybe not necessary
-    #- name: Login to Dockerhub
-    #  uses: docker/login-action@v1
-    #    with:
-    #      username: ${{ secrets.DOCKER_HUB_USERNAME }}
-    #      password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
-     
-    
-    #- name: Install Open Policy Agent
-      # Remember to use working-directory .infrastructure
-      # Download and run OPA docker image
-
