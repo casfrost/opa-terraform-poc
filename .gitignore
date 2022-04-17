@@ -5,6 +5,7 @@
 .infrastructure/*.backup
 .infrastructure/terraform.plan
 .infrastructure/tfplan.json
+
 # Ignore SPN login script
 spn-login.sh
 
