@@ -10,7 +10,9 @@ name: "Infrastructure Workflow"
 
 on:
   push:
-    branches: ['main', 'test/**']
+    branches:
+     - main
+     - test/*
 
 defaults:
     run:
