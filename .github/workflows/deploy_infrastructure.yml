@@ -70,26 +70,26 @@ jobs:
       
       # Policy check of terraform plan with OPA
       - name: Convert Terraform Plan to JSON
-      run: terraform show -json terraform.plan > ../tfplan.json
-      working-directory: .infrastructure
-    - name: Setup OPA
-      uses: open-policy-agent/setup-opa@v1
-      with:
-        version: latest
-    - name: Run OPA Tests
-      run: opa eval --fail-defined --data tests/main.rego --input tfplan.json "data.tfplan.skuRule" --format pretty
+        run: terraform show -json terraform.plan > ../tfplan.json
+        working-directory: .infrastructure
+      - name: Setup OPA
+        uses: open-policy-agent/setup-opa@v1
+        with:
+          version: latest
+      - name: Run OPA Tests
+        run: opa eval --fail-defined --data tests/main.rego --input tfplan.json "data.tfplan.skuRule" --format pretty
 
-    - name: Upload Terraform artifacts if plan is compliant
-      uses: actions/upload-artifact@v3
-      if: always()
-      with:
-        name: terraform
-        path: |
-          .infrastructure/.terraform
-          .infrastructure/*.tf
-          .infrastructure/*.lock.hcl
-          .infrastructure/terraform.plan
-        if-no-files-found: error
+      - name: Upload Terraform artifacts if plan is compliant
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: terraform
+          path: |
+            .infrastructure/.terraform
+            .infrastructure/*.tf
+            .infrastructure/*.lock.hcl
+            .infrastructure/terraform.plan
+          if-no-files-found: error
 
   terraform-apply:
     needs: terraform-plan
