@@ -110,14 +110,14 @@ jobs:
           version: latest
       - name: Run OPA test 1
         run: opa eval --fail-defined --data tests/main.rego --input tfplan.json "data.tfplan.skuRule" --format pretty
+        continue-on-error: true
       - name: Run OPA test 2
         run: opa eval --fail-defined --data tests/main.rego --input tfplan.json "data.tfplan.locationRule" --format pretty
-        if: always()
+        continue-on-error: true
         
   terraform-apply:
     needs: compliance-tests
     runs-on: ubuntu-latest
-    continue-on-error: true
     environment: NonProduction
     env:
       ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
