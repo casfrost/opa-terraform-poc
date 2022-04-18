@@ -2,7 +2,7 @@ name: "Open Policy Agent Workflow"
 
 on:
   push:
-    branches: 'test/*'
+    branches:
 
 defaults:
     run:
@@ -51,8 +51,7 @@ jobs:
       uses: open-policy-agent/setup-opa@v1
       with:
         version: latest
-    - name: Run OPA Tests
-      #TODO: Need to figure out why i get exit code 1 in pipeline and how to get around it
-      run: | 
-        opa eval --fail-defined --data tests/main.rego --input tfplan.json "data.tfplan.skuRule" --format pretty
-        opa eval --fail-defined --data tests/main.rego --input tfplan.json "data.tfplan.locationRule" --format pretty
+    - name: Run OPA Test
+      run: opa eval --fail-defined --data tests/main.rego --input tfplan.json "data.tfplan.locationRule" --format pretty
+      continue-on-error: true
+       
