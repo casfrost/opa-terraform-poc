@@ -92,6 +92,9 @@ jobs:
           name: terraform
           path: .infrastructure/
 
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v1
+
       - name: Convert Terraform Plan to JSON
         run: terraform show -json terraform.plan > ../tfplan.json
         working-directory: .infrastructure
@@ -101,11 +104,15 @@ jobs:
         with:
           version: latest
 
-      - name: Run OPA Tests
+      - name: Run OPA rule 1
         run: opa eval --fail-defined --data tests/main.rego --input tfplan.json "data.tfplan.skuRule" --format pretty
+      
+      - name: Run OPA rule 2
+        run: opa eval --fail-defined --data tests/main.rego --input tfplan.json "data.tfplan.locationRule" --format pretty
+        if: always()
 
   terraform-apply:
-    needs: terraform-plan
+    needs: compliance-tests
     runs-on: ubuntu-latest
     environment: NonProduction
     env:
