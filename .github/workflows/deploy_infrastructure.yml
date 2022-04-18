@@ -17,9 +17,6 @@ defaults:
       shell: bash
       
 jobs:
-  #########################################################################
-  # Workflow job to initialize, format, validate and check Terraform code #
-  #########################################################################
   terraform-preplan:
     runs-on: ubuntu-latest
     environment: NonProduction
@@ -31,21 +28,22 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
+
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v1
+
       - name: Terraform Init
         run: terraform init
         working-directory: .infrastructure
+
       - name: Terraform format
         run: terraform fmt -check --recursive
         working-directory: .infrastructure
+
       - name: Terraform Validate
         run: terraform validate
         working-directory: .infrastructure
-
-  ##############################################################
-  # Terraform plan job that uploads a terraform plan artifact  #
-  ##############################################################
+  
   terraform-plan:
     needs: terraform-preplan
     runs-on: ubuntu-latest
@@ -58,30 +56,40 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
+
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v1
 
       - name: Terraform Init
         run: terraform init
         working-directory: .infrastructure
+
       - name: Terraform Plan
         run: terraform plan -no-color -out=terraform.plan
         working-directory: .infrastructure
+      
+      # Policy check of terraform plan with OPA
+      - name: Convert Terraform Plan to JSON
+      run: terraform show -json terraform.plan > ../tfplan.json
+      working-directory: .infrastructure
+    - name: Setup OPA
+      uses: open-policy-agent/setup-opa@v1
+      with:
+        version: latest
+    - name: Run OPA Tests
+      run: opa eval --fail-defined --data tests/main.rego --input tfplan.json "data.tfplan.skuRule" --format pretty
 
-      - name: Upload Terraform artifacts after successful plan
-        uses: actions/upload-artifact@v3
-        with:
-          name: terraform
-          path: |
-            .infrastructure/.terraform
-            .infrastructure/*.tf
-            .infrastructure/*.lock.hcl
-            .infrastructure/terraform.plan
-          if-no-files-found: error
+    - name: Upload Terraform artifacts if plan is compliant
+      uses: actions/upload-artifact@v3
+      with:
+        name: terraform
+        path: |
+          .infrastructure/.terraform
+          .infrastructure/*.tf
+          .infrastructure/*.lock.hcl
+          .infrastructure/terraform.plan
+        if-no-files-found: error
 
-  ##################################################################
-  # Terraform apply job that downloads said artifact and applys it #
-  ##################################################################
   terraform-apply:
     needs: terraform-plan
     runs-on: ubuntu-latest
@@ -97,10 +105,13 @@ jobs:
         with:
           name: terraform
           path: ./.infrastructure
+
       - run: chmod -R u+x .terraform
         working-directory: .infrastructure
+
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v1
+
       - name: Terraform apply
         run: terraform apply -auto-approve ./terraform.plan
         working-directory: .infrastructure
