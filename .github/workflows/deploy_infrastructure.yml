@@ -100,7 +100,7 @@ jobs:
         with:
           version: latest
       
-      run: ls -la .infrastructure
+      - run: ls -la .infrastructure
 
       - name: Convert Terraform Plan to JSON
         run: terraform show -json terraform.plan > ../tfplan.json
