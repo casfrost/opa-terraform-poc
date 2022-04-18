@@ -1,4 +1,4 @@
-location = "eastus"
+location = "westeurope"
 rg_name  = "OPA-POC-RG"
 asp_name = "linux-app-service-plan"
 os_type  = "Linux"
