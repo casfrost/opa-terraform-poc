@@ -81,6 +81,7 @@ jobs:
 
     - name: Upload Terraform artifacts if plan is compliant
       uses: actions/upload-artifact@v3
+      if: always()
       with:
         name: terraform
         path: |
@@ -102,17 +103,21 @@ jobs:
     steps: 
       - name: Get prepared plan
         uses: actions/download-artifact@v2
+        if: always()
         with:
           name: terraform
           path: ./.infrastructure
 
       - run: chmod -R u+x .terraform
         working-directory: .infrastructure
+        if: always()
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v1
+        if: always()
 
       - name: Terraform apply
         run: terraform apply -auto-approve ./terraform.plan
         working-directory: .infrastructure
+        if: always()
 
