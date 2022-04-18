@@ -85,14 +85,14 @@ jobs:
       # Policy check of terraform plan with OPA
   compliance-tests:
     needs: terraform-preplan
-      runs-on: ubuntu-latest 
-      environment: NonProduction
-      env:
-        ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
-        ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
-        ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
-        ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
-      steps:
+    runs-on: ubuntu-latest 
+    environment: NonProduction
+    env:
+      ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+      ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+      ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+      ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+    steps:
       - name: Checkout repository
         uses: actions/checkout@v3
       - name: Run Terraform Init
