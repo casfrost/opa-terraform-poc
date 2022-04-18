@@ -84,7 +84,7 @@ jobs:
       
       # Policy check of terraform plan with OPA
   compliance-tests:
-    needs: terraform-preplan
+    needs: terraform-plan
     runs-on: ubuntu-latest 
     environment: NonProduction
     env:
@@ -112,6 +112,7 @@ jobs:
         run: opa eval --fail-defined --data tests/main.rego --input tfplan.json "data.tfplan.skuRule" --format pretty
       - name: Run OPA test 2
         run: opa eval --fail-defined --data tests/main.rego --input tfplan.json "data.tfplan.locationRule" --format pretty
+        if: always
         
   terraform-apply:
     needs: compliance-tests
