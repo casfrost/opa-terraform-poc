@@ -1,8 +1,6 @@
 name: "Open Policy Agent Workflow"
 
-on:
-  push:
-    branches:
+on: workflow_dispatch
 
 defaults:
     run:
