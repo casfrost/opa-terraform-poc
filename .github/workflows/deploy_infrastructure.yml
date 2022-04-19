@@ -109,7 +109,7 @@ jobs:
         with:
           version: latest
       - name: Run OPA test
-        run: opa eval --fail-defined --data tests/main.rego --input tfplan.json "data.tfplan.skuRule" --format pretty
+        run: opa eval --fail-defined --data tests/main.rego --input tfplan.json "data.tfplan.locationRule" --format pretty
         continue-on-error: true
         
   terraform-apply:
